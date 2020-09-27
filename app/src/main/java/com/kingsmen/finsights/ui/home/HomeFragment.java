@@ -2,16 +2,15 @@ package com.kingsmen.finsights.ui.home;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,14 +33,16 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.kingsmen.finsights.R;
-import com.kingsmen.finsights.service.location.LocationService;
+import com.kingsmen.finsights.dao.Offer;
+import com.kingsmen.finsights.values.CountrySpecificOffers;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 public class HomeFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = "HomeFragment";
     private HomeViewModel homeViewModel;
-
-    LocationService mService;
-    boolean mBound = false;
 
     private LocationManager locationManager;
     private Location mLocation;
@@ -52,6 +53,14 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
 
     TextView mLatitudeTextView;
     TextView mLongitudeTextView;
+    TextView mCountryTextView;
+    TextView mOffersTextView;
+
+    Double mLatitude;
+    Double mLongitude;
+    String mCountry;
+
+    CountrySpecificOffers offers;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -71,7 +80,8 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
 
         mLatitudeTextView = (TextView) root.findViewById(R.id.latitude_textview);
         mLongitudeTextView = (TextView) root.findViewById(R.id.longitude_textview);
-
+        mCountryTextView = (TextView) root.findViewById(R.id.country_textView);
+        mOffersTextView = (TextView) root.findViewById(R.id.offers_textView);
         // start and bind location service
 //        Intent intent = new Intent(getActivity(), LocationService.class);
 //        getActivity().startService(intent);
@@ -82,9 +92,10 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-        Log.d(TAG, "ismGoogleApiClientConnected inOnCreate before connect = " + mGoogleApiClient.isConnected());
         mGoogleApiClient.connect();
-        Log.d(TAG, "ismGoogleApiClientConnected inOnCreate after connect = " + mGoogleApiClient.isConnected());
+
+        offers = new CountrySpecificOffers();
+        offers.init();
 
         return root;
     }
@@ -122,29 +133,6 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
         dialog.show();
     }
 
-    private ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            LocationService.LocationBinder binder = (LocationService.LocationBinder) service;
-            mService = binder.getService();
-            mBound = true;
-
-            if (mService.getmLocation() != null) {
-                mLatitudeTextView.setText(mService.getmLatitude());
-                mLongitudeTextView.setText(mService.getmLongitude());
-            } else {
-                mLatitudeTextView.setText("N/A");
-                mLongitudeTextView.setText("N/A");
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
     protected void startLocationUpdates() {
         // Create the location request
         Log.d(TAG, "startLocationUpdates");
@@ -169,7 +157,6 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
         Log.d("reque", "--->>>>");
     }
 
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "onConnected");
@@ -189,10 +176,27 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
             startLocationUpdates();
         }
         if (mLocation != null) {
-            Log.d(TAG, String.valueOf(mLocation.getLatitude()));
-            Log.d(TAG, String.valueOf(mLocation.getLongitude()));
-            // mLatitudeTextView.setText(String.valueOf(mLocation.getLatitude()));
-            // mLongitudeTextView.setText(String.valueOf(mLocation.getLongitude()));
+            mLatitude = mLocation.getLatitude();
+            mLongitude = mLocation.getLongitude();
+
+            Log.d(TAG, "Lat = " + String.valueOf(mLatitude));
+            Log.d(TAG, "Long = " + String.valueOf(mLongitude));
+
+            mLatitudeTextView.setText("Lat = " + String.valueOf(mLocation.getLatitude()));
+            mLongitudeTextView.setText("Long = " + String.valueOf(mLocation.getLongitude()));
+
+            mCountry = getAddress(mLatitude, mLongitude);
+            Log.d(TAG, "Country = " + String.valueOf(mCountry));
+            mCountryTextView.setText("Country = " + mCountry);
+
+            List<Offer> countryOffers = offers.getOffers().get(mCountry);
+            String s = "";
+            s = s + "Offers for this country are\n";
+            for (Offer o: countryOffers) {
+                s = s + "Offer type: " + o.getType() + "\n";
+                s = s + "Offer description: " + o.getDescription() + "\n";
+            }
+            mOffersTextView.setText(s);
         } else {
             Toast.makeText(getContext(), "Location not Detected", Toast.LENGTH_SHORT).show();
         }
@@ -216,8 +220,26 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
                 Double.toString(location.getLongitude());
         // mLatitudeTextView.setText(String.valueOf(location.getLatitude()));
         // mLongitudeTextView.setText(String.valueOf(location.getLongitude() ));
-        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+        // Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+
         // You can now create a LatLng Object for use with maps
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
     }
+
+    public String getAddress(double lat, double lng) {
+        Geocoder gcd = new Geocoder(getContext(), Locale.getDefault());
+        List<Address> addresses = null;
+        try {
+            addresses = gcd.getFromLocation(lat, lng, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (addresses.size() > 0) {
+            String countryName = addresses.get(0).getCountryName();
+            return countryName;
+        }
+        return null;
+    }
+
 }
