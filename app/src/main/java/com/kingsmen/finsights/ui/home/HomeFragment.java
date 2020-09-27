@@ -1,11 +1,14 @@
 package com.kingsmen.finsights.ui.home;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -15,17 +18,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.kingsmen.finsights.R;
 import com.kingsmen.finsights.service.location.LocationService;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = "HomeFragment";
     private HomeViewModel homeViewModel;
 
@@ -33,6 +44,12 @@ public class HomeFragment extends Fragment {
     boolean mBound = false;
 
     private LocationManager locationManager;
+    private Location mLocation;
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    private long UPDATE_INTERVAL = 2 * 1000;  /* 10 secs */
+    private long FASTEST_INTERVAL = 2000; /* 2 sec */
+
     TextView mLatitudeTextView;
     TextView mLongitudeTextView;
 
@@ -56,9 +73,18 @@ public class HomeFragment extends Fragment {
         mLongitudeTextView = (TextView) root.findViewById(R.id.longitude_textview);
 
         // start and bind location service
-        Intent intent = new Intent(getActivity(), LocationService.class);
-        getActivity().startService(intent);
-        getActivity().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+//        Intent intent = new Intent(getActivity(), LocationService.class);
+//        getActivity().startService(intent);
+//        getActivity().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        Log.d(TAG, "ismGoogleApiClientConnected inOnCreate before connect = " + mGoogleApiClient.isConnected());
+        mGoogleApiClient.connect();
+        Log.d(TAG, "ismGoogleApiClientConnected inOnCreate after connect = " + mGoogleApiClient.isConnected());
 
         return root;
     }
@@ -119,4 +145,79 @@ public class HomeFragment extends Fragment {
             mBound = false;
         }
     };
+    protected void startLocationUpdates() {
+        // Create the location request
+        Log.d(TAG, "startLocationUpdates");
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(UPDATE_INTERVAL)
+                .setFastestInterval(FASTEST_INTERVAL);
+        // Request location updates
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        Log.d(TAG, "isGoogleApiClientConnected = " + mGoogleApiClient.isConnected());
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                mLocationRequest, this);
+        Log.d("reque", "--->>>>");
+    }
+
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.d(TAG, "onConnected");
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        startLocationUpdates();
+        mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if(mLocation == null){
+            startLocationUpdates();
+        }
+        if (mLocation != null) {
+            Log.d(TAG, String.valueOf(mLocation.getLatitude()));
+            Log.d(TAG, String.valueOf(mLocation.getLongitude()));
+            // mLatitudeTextView.setText(String.valueOf(mLocation.getLatitude()));
+            // mLongitudeTextView.setText(String.valueOf(mLocation.getLongitude()));
+        } else {
+            Toast.makeText(getContext(), "Location not Detected", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.i(TAG, "Connection Suspended");
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.i(TAG, "Connection failed. Error: " + connectionResult.getErrorCode());
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        String msg = "Updated Location: " +
+                Double.toString(location.getLatitude()) + "," +
+                Double.toString(location.getLongitude());
+        // mLatitudeTextView.setText(String.valueOf(location.getLatitude()));
+        // mLongitudeTextView.setText(String.valueOf(location.getLongitude() ));
+        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+        // You can now create a LatLng Object for use with maps
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+    }
 }
