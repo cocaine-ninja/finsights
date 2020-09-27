@@ -1,11 +1,15 @@
 package com.kingsmen.finsights.ui.home;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +32,7 @@ public class HomeFragment extends Fragment {
     LocationService mService;
     boolean mBound = false;
 
+    private LocationManager locationManager;
     TextView mLatitudeTextView;
     TextView mLongitudeTextView;
 
@@ -45,16 +50,50 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        mLatitudeTextView = (TextView) getActivity().findViewById(R.id.latitude_textview);
-        mLongitudeTextView = (TextView) getActivity().findViewById(R.id.longitude_textview);
+        // checkLocation();
+
+        mLatitudeTextView = (TextView) root.findViewById(R.id.latitude_textview);
+        mLongitudeTextView = (TextView) root.findViewById(R.id.longitude_textview);
 
         // start and bind location service
         Intent intent = new Intent(getActivity(), LocationService.class);
         getActivity().startService(intent);
-
         getActivity().bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
         return root;
+    }
+
+    private boolean checkLocation() {
+        Log.d(TAG, "checkLocation");
+        if(!isLocationEnabled())
+            showAlert();
+        return isLocationEnabled();
+    }
+
+    private boolean isLocationEnabled() {
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    private void showAlert() {
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+        dialog.setTitle("Enable Location")
+                .setMessage("Your Locations Settings is set to 'Off'.\nPlease Enable Location to " +
+                        "use this app")
+                .setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(myIntent);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    }
+                });
+        dialog.show();
     }
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -66,8 +105,13 @@ public class HomeFragment extends Fragment {
             mService = binder.getService();
             mBound = true;
 
-            mLatitudeTextView.setText(mService.getmLatitude());
-            mLongitudeTextView.setText(mService.getmLongitude());
+            if (mService.getmLocation() != null) {
+                mLatitudeTextView.setText(mService.getmLatitude());
+                mLongitudeTextView.setText(mService.getmLongitude());
+            } else {
+                mLatitudeTextView.setText("N/A");
+                mLongitudeTextView.setText("N/A");
+            }
         }
 
         @Override

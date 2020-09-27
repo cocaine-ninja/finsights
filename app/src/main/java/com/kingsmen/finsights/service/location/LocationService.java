@@ -22,11 +22,12 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 
-public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
+public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = "LocationService";
 
     private final IBinder binder = new LocationBinder();
@@ -51,6 +52,14 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     private String mLatitude;
     private String mLongitude;
+
+    public Location getmLocation() {
+        return mLocation;
+    }
+
+    public void setmLocation(Location mLocation) {
+        this.mLocation = mLocation;
+    }
 
     public String getmLatitude() {
         return mLatitude;
@@ -84,16 +93,24 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         this.setmLatitude("N/A");
         this.setmLongitude("N/A");
 
+        this.buildGoogleApiClient();
+
+        mLocationManager = (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
+        // this.checkLocation();
+
+        // this.startLocationUpdates();
+        return;
+    }
+
+    private synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-        mLocationManager = (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
-        checkLocation();
-
-        startLocationUpdates();
-        return;
+        Log.d(TAG, "ismGoogleApiClientConnected inOnCreate before connect = " + mGoogleApiClient.isConnected());
+        mGoogleApiClient.connect();
+        Log.d(TAG, "ismGoogleApiClientConnected inOnCreate after connect = " + mGoogleApiClient.isConnected());
     }
 
     private boolean checkLocation() {
@@ -122,6 +139,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                 });
         dialog.show();
     }
+
     private boolean isLocationEnabled() {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
@@ -130,6 +148,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     protected void startLocationUpdates() {
         // Create the location request
+        Log.d(TAG, "startLocationUpdates");
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(UPDATE_INTERVAL)
@@ -145,6 +164,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+        Log.d(TAG, "ismGoogleApiClientConnected = " + mGoogleApiClient.isConnected());
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
                 mLocationRequest, this);
         Log.d("reque", "--->>>>");
@@ -171,6 +191,8 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         if (mLocation != null) {
             this.setmLatitude(String.valueOf(mLocation.getLatitude()));
             this.setmLongitude(String.valueOf(mLocation.getLongitude()));
+            Log.d(TAG, this.getmLatitude());
+            Log.d(TAG, this.getmLatitude());
             // mLatitudeTextView.setText(String.valueOf(mLocation.getLatitude()));
             // mLongitudeTextView.setText(String.valueOf(mLocation.getLongitude()));
         } else {
