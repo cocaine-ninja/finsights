@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -25,6 +26,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -33,10 +36,14 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.kingsmen.finsights.R;
+import com.kingsmen.finsights.adapters.NewsAdapter;
 import com.kingsmen.finsights.dao.Offer;
 import com.kingsmen.finsights.values.CountrySpecificOffers;
+import com.kingsmen.finsights.adapters.OfferAdapter;
+import com.kingsmen.finsights.values.NewsList;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,16 +58,19 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
     private long UPDATE_INTERVAL = 2 * 1000;  /* 10 secs */
     private long FASTEST_INTERVAL = 2000; /* 2 sec */
 
-    TextView mLatitudeTextView;
-    TextView mLongitudeTextView;
-    TextView mCountryTextView;
-    TextView mOffersTextView;
+    private RecyclerView offersRecyclerView;
+    private RecyclerView newsRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.Adapter mNewsAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+
 
     Double mLatitude;
     Double mLongitude;
     String mCountry;
 
     CountrySpecificOffers offers;
+    NewsList newsList;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -68,20 +78,29 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
         homeViewModel =
                 ViewModelProviders.of(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
-        final TextView textView = root.findViewById(R.id.text_home);
+//        final TextView textView = root.findViewById(R.id.text_home);
         homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
-                textView.setText(s);
+//                textView.setText(s);
             }
         });
 
+        offersRecyclerView = root.findViewById(R.id.offersRecyclerView);
+        newsRecyclerView = root.findViewById(R.id.newsRecyclerView);
+        LinearLayoutManager horizontalLayoutManager
+                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        offersRecyclerView.setLayoutManager(horizontalLayoutManager);
+        LinearLayoutManager horizontalLayoutManager2
+                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        newsRecyclerView.setLayoutManager(horizontalLayoutManager2);
+
         // checkLocation();
 
-        mLatitudeTextView = (TextView) root.findViewById(R.id.latitude_textview);
-        mLongitudeTextView = (TextView) root.findViewById(R.id.longitude_textview);
-        mCountryTextView = (TextView) root.findViewById(R.id.country_textView);
-        mOffersTextView = (TextView) root.findViewById(R.id.offers_textView);
+//        mLatitudeTextView = (TextView) root.findViewById(R.id.latitude_textview);
+//        mLongitudeTextView = (TextView) root.findViewById(R.id.longitude_textview);
+//        mCountryTextView = (TextView) root.findViewById(R.id.country_textView);
+//        mOffersTextView = (TextView) root.findViewById(R.id.offers_textView);
         // start and bind location service
 //        Intent intent = new Intent(getActivity(), LocationService.class);
 //        getActivity().startService(intent);
@@ -96,6 +115,9 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
 
         offers = new CountrySpecificOffers();
         offers.init();
+
+        newsList = new NewsList();
+        newsList.init();
 
         return root;
     }
@@ -182,12 +204,12 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
             Log.d(TAG, "Lat = " + String.valueOf(mLatitude));
             Log.d(TAG, "Long = " + String.valueOf(mLongitude));
 
-            mLatitudeTextView.setText("Lat = " + String.valueOf(mLocation.getLatitude()));
-            mLongitudeTextView.setText("Long = " + String.valueOf(mLocation.getLongitude()));
+//            mLatitudeTextView.setText("Lat = " + String.valueOf(mLocation.getLatitude()));
+//            mLongitudeTextView.setText("Long = " + String.valueOf(mLocation.getLongitude()));
 
             mCountry = getAddress(mLatitude, mLongitude);
             Log.d(TAG, "Country = " + String.valueOf(mCountry));
-            mCountryTextView.setText("Country = " + mCountry);
+//            mCountryTextView.setText("Country = " + mCountry);
 
             List<Offer> countryOffers = offers.getOffers().get(mCountry);
             String s = "";
@@ -196,7 +218,13 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
                 s = s + "Offer type: " + o.getType() + "\n";
                 s = s + "Offer description: " + o.getDescription() + "\n";
             }
-            mOffersTextView.setText(s);
+            Log.d(TAG, s);
+            mAdapter = new OfferAdapter(getContext(), countryOffers);
+            offersRecyclerView.setAdapter(mAdapter);
+
+            mNewsAdapter = new NewsAdapter(getContext(), newsList.getNewsList());
+            newsRecyclerView.setAdapter(mNewsAdapter);
+//            mOffersTextView.setText(s);
         } else {
             Toast.makeText(getContext(), "Location not Detected", Toast.LENGTH_SHORT).show();
         }

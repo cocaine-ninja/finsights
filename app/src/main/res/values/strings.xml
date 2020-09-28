@@ -10,4 +10,16 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
+
+    <!-- home fragment values   -->
+    <string name="monthly_budget_heading">MONTHLY BUDGET</string>
+    <string name="monthly_summary_heading">MONTHLY SUMMARY</string>
+    <string name="net_account_balance_heading">NET ACCOUNT BALANCE</string>
+    <string name="credit_score_heading">CREDIT SCORE</string>
+    <string name="news_updates_heading">NEWS UPDATES</string>
+    <string name="special_offers_heading">SPECIAL OFFERS</string>
+
+    <string name="current_monthly_budget_percentage">9%</string>
+    <string name="current_credit_score">753/900</string>
+    <string name="safe_to_spend_rs_per_day">Safe to spend: Rs. 1000/day</string>
 </resources>
