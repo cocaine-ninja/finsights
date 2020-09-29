@@ -8,6 +8,8 @@
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_menu_camera"
             android:title="@string/menu_home" />
+
+        <!-- TODO: remove gallley and slideshow fragments -->
         <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"
@@ -16,5 +18,35 @@
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_slideshow" />
+
+        <item
+            android:id="@+id/nav_transactions"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_transactions" />
+
+        <item
+            android:id="@+id/nav_accounts"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Accounts" />
+
+        <item
+            android:id="@+id/nav_bills"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Bills" />
+
+        <item
+            android:id="@+id/nav_micro_lessons"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Micro Lessons" />
+
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Settings" />
+
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Logout" />
     </group>
 </menu>

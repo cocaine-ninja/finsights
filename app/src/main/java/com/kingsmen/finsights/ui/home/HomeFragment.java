@@ -68,7 +68,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class HomeFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SeekBar.OnSeekBarChangeListener, OnChartValueSelectedListener {
+public class HomeFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnChartValueSelectedListener {
     private static final String TAG = "HomeFragment";
     private HomeViewModel homeViewModel;
 
@@ -428,24 +428,6 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
         chart.highlightValues(null);
 
         chart.invalidate();
-    }
-
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        tvX.setText(String.valueOf(seekBarX.getProgress()));
-        tvY.setText(String.valueOf(seekBarY.getProgress()));
-
-        setData(amountSpentByCategory);
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-
     }
 
     @Override
