@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="transactionTypeArray">
+        <item>All</item>
+        <item>Category</item>
+        <item>Merchant</item>
+    </string-array>
+    <string-array name="transactionDateArray">
+        <item>Today</item>
+        <item>This week</item>
+        <item>This month</item>
+        <item>This year</item>
+    </string-array>
+</resources>
