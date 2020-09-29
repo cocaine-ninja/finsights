@@ -272,6 +272,7 @@ public class TransactionsFragment extends Fragment implements OnChartValueSelect
         } else if (parent.getId() == R.id.transactionDateSpinner) {
             selectedDate = (String) parent.getItemAtPosition(position);
         }
+        // TODO: fetch data according to filter
         this.updateBarChart(selectedType, selectedDate);
     }
 

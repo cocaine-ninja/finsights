@@ -28,6 +28,13 @@ public class Transaction {
         this.merchant = merchant;
     }
 
+    public Transaction(String category, int amount, Date date, String merchant) {
+        this.category = category;
+        this.amount = Double.valueOf(amount);
+        this.date = date;
+        this.merchant = merchant;
+    }
+
     public Transaction(String category, Integer amount, Date date) {
         this.category = category;
         this.amount = Double.valueOf(amount);

@@ -34,7 +34,7 @@ public class TransactionList {
     public void init() throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-        Transaction tf1 = new Transaction("Food", 150, sdf.parse("29/09/2020"));
+        Transaction tf1 = new Transaction("Food", 150, sdf.parse("29/09/2020"), "Swiggy");
         Transaction tf2 = new Transaction("Food", 400, sdf.parse("28/09/2020"));
         Transaction tf3 = new Transaction("Food", 300, sdf.parse("27/09/2020"));
         Transaction tf4 = new Transaction("Food", 50, sdf.parse("26/09/2020"));
