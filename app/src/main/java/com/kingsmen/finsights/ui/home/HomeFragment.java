@@ -7,16 +7,22 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +35,18 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.utils.MPPointF;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -41,13 +59,16 @@ import com.kingsmen.finsights.dao.Offer;
 import com.kingsmen.finsights.values.CountrySpecificOffers;
 import com.kingsmen.finsights.adapters.OfferAdapter;
 import com.kingsmen.finsights.values.NewsList;
+import com.kingsmen.finsights.values.TransactionList;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-public class HomeFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class HomeFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SeekBar.OnSeekBarChangeListener, OnChartValueSelectedListener {
     private static final String TAG = "HomeFragment";
     private HomeViewModel homeViewModel;
 
@@ -64,6 +85,9 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
     private RecyclerView.Adapter mNewsAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
+    private PieChart chart;
+    private SeekBar seekBarX, seekBarY;
+    private TextView tvX, tvY;
 
     Double mLatitude;
     Double mLongitude;
@@ -71,6 +95,8 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
 
     CountrySpecificOffers offers;
     NewsList newsList;
+    TransactionList transactions;
+    Map<String, Double> amountSpentByCategory;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -119,7 +145,82 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
         newsList = new NewsList();
         newsList.init();
 
+        transactions = new TransactionList();
+        try {
+            transactions.init();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        amountSpentByCategory = transactions.getAggregateByCategory();
+
+        this.initPieChart(root);
+
         return root;
+    }
+
+    private void initPieChart(View view) {
+        chart = view.findViewById(R.id.monthlyBudgetChart);
+
+        chart.setUsePercentValues(true);
+        chart.getDescription().setEnabled(false);
+        chart.setExtraOffsets(5, 10, 5, 5);
+
+        chart.setDragDecelerationFrictionCoef(0.95f);
+
+        // chart.setCenterTextTypeface(tfLight);
+        // chart.setCenterText(generateCenterSpannableText());
+
+        chart.setDrawHoleEnabled(true);
+        chart.setHoleColor(Color.WHITE);
+
+        chart.setTransparentCircleColor(Color.WHITE);
+        chart.setTransparentCircleAlpha(110);
+
+        chart.setHoleRadius(58f);
+        chart.setTransparentCircleRadius(61f);
+
+        chart.setDrawCenterText(true);
+
+        chart.setRotationAngle(0);
+        // enable rotation of the chart by touch
+        chart.setRotationEnabled(true);
+        chart.setHighlightPerTapEnabled(true);
+
+        // chart.setUnit(" €");
+        // chart.setDrawUnitsInChart(true);
+
+        // add a selection listener
+        chart.setOnChartValueSelectedListener(this);
+
+        chart.animateY(1400, Easing.EaseInOutQuad);
+        // chart.spin(2000, 0, 360);
+
+        // legend
+        Legend l = chart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
+        l.setOrientation(Legend.LegendOrientation.VERTICAL);
+        l.setDrawInside(false);
+        l.setXEntrySpace(7f);
+        l.setYEntrySpace(0f);
+        l.setYOffset(0f);
+
+        // entry label styling
+        chart.setEntryLabelColor(Color.WHITE);
+        // chart.setEntryLabelTypeface(tfRegular);
+        chart.setEntryLabelTextSize(10f);
+        chart.setDrawEntryLabels(false);
+    }
+
+    private SpannableString generateCenterSpannableText() {
+        SpannableString s = new SpannableString("MPAndroidChart\ndeveloped by Philipp Jahoda");
+        s.setSpan(new RelativeSizeSpan(1.7f), 0, 14, 0);
+        s.setSpan(new StyleSpan(Typeface.NORMAL), 14, s.length() - 15, 0);
+        s.setSpan(new ForegroundColorSpan(Color.GRAY), 14, s.length() - 15, 0);
+        s.setSpan(new RelativeSizeSpan(.8f), 14, s.length() - 15, 0);
+        s.setSpan(new StyleSpan(Typeface.ITALIC), s.length() - 14, s.length(), 0);
+        s.setSpan(new ForegroundColorSpan(ColorTemplate.getHoloBlue()), s.length() - 14, s.length(), 0);
+        return s;
     }
 
     private boolean checkLocation() {
@@ -225,6 +326,8 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
             mNewsAdapter = new NewsAdapter(getContext(), newsList.getNewsList());
             newsRecyclerView.setAdapter(mNewsAdapter);
 //            mOffersTextView.setText(s);
+
+            this.setData(amountSpentByCategory);
         } else {
             Toast.makeText(getContext(), "Location not Detected", Toast.LENGTH_SHORT).show();
         }
@@ -270,4 +373,92 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
         return null;
     }
 
+    // pie chart
+    private void setData(Map<String, Double> amountSpentByCategory) {
+        ArrayList<PieEntry> entries = new ArrayList<>();
+
+        // NOTE: The order of the entries when being added to the entries array determines their position around the center of
+        // the chart.
+        for (String category: amountSpentByCategory.keySet()) {
+//            Float f = amountSpentByCategory.get(category).floatValue();
+            entries.add(new PieEntry(amountSpentByCategory.get(category).floatValue(),category));
+        }
+
+//        PieDataSet dataSet = new PieDataSet(entries, "Monthly Budget Summary");
+        PieDataSet dataSet = new PieDataSet(entries, "");
+
+        dataSet.setDrawIcons(false);
+
+        dataSet.setSliceSpace(3f);
+        dataSet.setIconsOffset(new MPPointF(0, 40));
+        dataSet.setSelectionShift(5f);
+
+        // add a lot of colors
+
+        ArrayList<Integer> colors = new ArrayList<>();
+
+        for (int c : ColorTemplate.VORDIPLOM_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.JOYFUL_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.COLORFUL_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.LIBERTY_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.PASTEL_COLORS)
+            colors.add(c);
+
+        colors.add(ColorTemplate.getHoloBlue());
+
+        dataSet.setColors(colors);
+        //dataSet.setSelectionShift(0f);
+
+        PieData data = new PieData(dataSet);
+        data.setValueFormatter(new PercentFormatter());
+        data.setValueTextSize(11f);
+        data.setValueTextColor(Color.WHITE);
+        // data.setValueTypeface(tfLight);
+        chart.setData(data);
+
+        // undo all highlights
+        chart.highlightValues(null);
+
+        chart.invalidate();
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        tvX.setText(String.valueOf(seekBarX.getProgress()));
+        tvY.setText(String.valueOf(seekBarY.getProgress()));
+
+        setData(amountSpentByCategory);
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onValueSelected(Entry e, Highlight h) {
+        if (e == null)
+            return;
+        Log.i("VAL SELECTED",
+                "Value: " + e.getY() + ", index: " + h.getX()
+                        + ", DataSet index: " + h.getDataSetIndex());
+    }
+
+    @Override
+    public void onNothingSelected() {
+        Log.i("PieChart", "nothing selected");
+    }
 }

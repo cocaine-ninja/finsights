@@ -70,6 +70,12 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:text="@string/monthly_summary_heading" />
+
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/monthlyBudgetChart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
