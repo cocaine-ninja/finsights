@@ -12,17 +12,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.kingsmen.finsights.R;
 import com.kingsmen.finsights.dao.Transaction;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHolder> {
     private List<Transaction> transactions;
     private LayoutInflater mInflater;
     private TransactionAdapter.ItemClickListener mClickListener;
+    private SimpleDateFormat ft;
 
     // data is passed into the constructor
     public TransactionAdapter(Context context, List<Transaction> transactions) {
         this.mInflater = LayoutInflater.from(context);
         this.transactions = transactions;
+        ft = new SimpleDateFormat ("dd MMM, yyyy");
     }
 
     // inflates the row layout from xml when needed
@@ -39,7 +42,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         Transaction t = this.transactions.get(position);
         String transactionCategory = t.getCategory();
         String transactionAmount = String.valueOf(t.getAmount());
-        String transactionDate = String.valueOf(t.getDate());
+        String transactionDate = String.valueOf(ft.format(t.getDate()));
         holder.transactionCategoryTextView.setText(transactionCategory);
         holder.transactionAmountTextView.setText(transactionAmount);
         holder.transactionDateTextView.setText(transactionDate);

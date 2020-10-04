@@ -24,4 +24,5 @@
     <string name="current_credit_score">753/900</string>
     <string name="safe_to_spend_rs_per_day">Safe to spend: Rs. 1000/day</string>
     <string name="dash">-</string>
+    <string name="menu_accounts">Accounts</string>
 </resources>

@@ -8,7 +8,7 @@
     android:padding="10dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="257dp"
+        android:layout_width="260dp"
         android:layout_height="91dp">
 
         <TextView
