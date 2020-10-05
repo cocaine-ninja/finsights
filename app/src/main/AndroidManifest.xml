@@ -23,6 +23,7 @@
             </intent-filter>
         </activity>
         <service android:name=".service.location.LocationService" />
+        <activity android:name=".TextActivity" />
     </application>
 
 </manifest>

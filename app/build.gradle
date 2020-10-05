@@ -27,6 +27,7 @@ repositories {
 }
 
 dependencies {
+    def android_libs_version = "28.0.0"
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -38,8 +39,14 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation "com.android.support:appcompat-v7:$android_libs_version"
+    implementation "com.android.support:design:$android_libs_version"
 
     implementation 'com.google.android.gms:play-services:11.8.0'
     // MPAndroidChart
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    def aws_version = "2.16.+"
+    implementation ("com.amazonaws:aws-android-sdk-lex:$aws_version@aar") { transitive=true }
+    implementation ("com.amazonaws:aws-android-sdk-mobile-client:$aws_version@aar") { transitive=true }
 }
