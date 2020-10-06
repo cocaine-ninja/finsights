@@ -25,4 +25,18 @@
     <string name="safe_to_spend_rs_per_day">Safe to spend: Rs. 1000/day</string>
     <string name="dash">-</string>
     <string name="menu_accounts">Accounts</string>
+
+    <string name="Read">Button</string>
+    <string name="read">Read</string>
+    <string name="onboard">Welcome</string>
+    <string name="phoneHint">Phone No</string>
+    <string name="emailHint">Email</string>
+    <string name="passwordHint">Password</string>
+    <string name="ageHint">Age</string>
+    <string name="signup">Sign Up</string>
+    <string name="smsAck">Authorise to use SMS data for personalisation</string>
+    <string name="country">Contry</string>
+    <string name="gender">Gender</string>
+    <string name="continue_ahead">Continue</string>
+    <string name="personalize">Let\'s know you</string>
 </resources>
