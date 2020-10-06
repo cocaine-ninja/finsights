@@ -34,4 +34,10 @@
         android:name="com.kingsmen.finsights.ui.accounts.AccountsFragment"
         android:label="@string/menu_accounts"
         tools:layout="@layout/fragment_accounts" />
+
+    <fragment
+        android:id="@+id/nav_micro_lessons"
+        android:name="com.kingsmen.finsights.ui.microlessons.MicroLessonsFragment"
+        android:label="@string/menu_Microlessons"
+        tools:layout="@layout/fragment_microlessons" />
 </navigation>

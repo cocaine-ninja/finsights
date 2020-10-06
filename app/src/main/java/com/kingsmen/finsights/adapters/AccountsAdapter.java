@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -37,12 +38,19 @@ public class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHo
     public void onBindViewHolder(@NonNull AccountsAdapter.ViewHolder holder, int position) {
         Account a = this.accounts.get(position);
         String accountType = a.getAccountType();
+        String accountName = a.getAccountName();
         String accountBalance = String.valueOf(a.getAccountBalance());
         String accountExpenditure = String.valueOf(a.getAccountExpenditure());
 
-        holder.accountTypeTextView.setText(accountType);
+        holder.accountTypeTextView.setText(accountName);
         holder.accountBalanceTextView.setText(accountBalance);
         holder.accountExpenditureTextView.setText(accountExpenditure);
+
+        if (accountType == "savings") {
+            holder.accountTypeImageView.setImageResource(R.drawable.bank);
+        } else {
+            holder.accountTypeImageView.setImageResource(R.drawable.cc);
+        }
     }
 
     @Override
@@ -55,12 +63,14 @@ public class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHo
         TextView accountTypeTextView;
         TextView accountBalanceTextView;
         TextView accountExpenditureTextView;
+        ImageView accountTypeImageView;
 
         ViewHolder(View itemView) {
             super(itemView);
             accountTypeTextView = itemView.findViewById(R.id.accountTypeTextView);
             accountBalanceTextView = itemView.findViewById(R.id.accountBalanceTextView);
             accountExpenditureTextView = itemView.findViewById(R.id.accountExpenditureTextView);
+            accountTypeImageView = itemView.findViewById(R.id.imageView4);
             itemView.setOnClickListener(this);
         }
 

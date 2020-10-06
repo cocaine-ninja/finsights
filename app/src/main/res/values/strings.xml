@@ -2,8 +2,8 @@
     <string name="app_name">Finsights</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">Fins!ghts</string>
+    <string name="nav_header_subtitle">user@kingsmen.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -15,7 +15,7 @@
     <!-- home fragment values   -->
     <string name="monthly_budget_heading">MONTHLY BUDGET</string>
     <string name="monthly_summary_heading">MONTHLY SUMMARY</string>
-    <string name="net_account_balance_heading">NET ACCOUNT BALANCE</string>
+    <string name="net_account_balance_heading">ACCOUNT BALANCE</string>
     <string name="credit_score_heading">CREDIT SCORE</string>
     <string name="news_updates_heading">NEWS UPDATES</string>
     <string name="special_offers_heading">SPECIAL OFFERS</string>
@@ -39,4 +39,5 @@
     <string name="gender">Gender</string>
     <string name="continue_ahead">Continue</string>
     <string name="personalize">Let\'s know you</string>
+    <string name="menu_Microlessons">Micro Lessons</string>
 </resources>

@@ -38,43 +38,50 @@ class MainActivity2 : AppCompatActivity() {
         }
     }
 
-    private suspend fun setSmsMessage() {
-        val sms = SmsAnalysis()
-        var filteredSmsData:ArrayList<ExpenseData>
-        val smsList =   ArrayList<SmsData>()
-        var count : Int = 0;
+    fun readSMS() {
+//        GlobalScope.launch { // launch a new coroutine in background and continue
+            setSmsMessage()
+            println("World!")
+//        }
+    }
 
-        val cursor = contentResolver.query(
-            Uri.parse("content://sms/inbox"),
-            null,
-            null,
-            null,
-            null
-        )
-
-        if (cursor != null) {
-            if(cursor.moveToFirst()) {
-                val nameId = cursor.getColumnIndex("address")
-                val messageId = cursor.getColumnIndex("body")
-                val dateId = cursor.getColumnIndex("date")
-
-                do {
-                    val dateString = cursor.getString(dateId)
-                    smsList.add(
-                        SmsData(
-                            cursor.getString(nameId),
-                            Date(dateString.toLong()).toString(), cursor.getString(messageId)
-                        )
-                    )
-                } while (cursor.moveToNext())
-            }
-            cursor.close()
-
-            filteredSmsData = sms.getData(smsList)
-            Log.d("FILTERED DATA",filteredSmsData.toString())
-            // viewSms.setText(filteredSmsData[0].storeName)
-        }
-        Log.d("Size------------------------------", smsList.size.toString())
+    fun setSmsMessage() {
+//        val sms = SmsAnalysis()
+//        var filteredSmsData:ArrayList<ExpenseData>
+//        val smsList =   ArrayList<SmsData>()
+//        var count : Int = 0;
+//
+//        val cursor = contentResolver.query(
+//            Uri.parse("content://sms/inbox"),
+//            null,
+//            null,
+//            null,
+//            null
+//        )
+//
+//        if (cursor != null) {
+//            if(cursor.moveToFirst()) {
+//                val nameId = cursor.getColumnIndex("address")
+//                val messageId = cursor.getColumnIndex("body")
+//                val dateId = cursor.getColumnIndex("date")
+//
+//                do {
+//                    val dateString = cursor.getString(dateId)
+//                    smsList.add(
+//                        SmsData(
+//                            cursor.getString(nameId),
+//                            Date(dateString.toLong()), cursor.getString(messageId)
+//                        )
+//                    )
+//                } while (cursor.moveToNext())
+//            }
+//            cursor.close()
+//
+//            filteredSmsData = sms.getData(smsList)
+//            Log.d("FILTERED DATA",filteredSmsData.toString())
+//            // viewSms.setText(filteredSmsData[0].storeName)
+//        }
+        //Log.d("Size------------------------------", smsList.size.toString())
 
     }
 

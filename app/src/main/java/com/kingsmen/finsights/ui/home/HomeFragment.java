@@ -6,12 +6,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.SpannableString;
@@ -54,8 +56,11 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.kingsmen.finsights.R;
+import com.kingsmen.finsights.SmsAnalysis;
+import com.kingsmen.finsights.SmsData;
 import com.kingsmen.finsights.adapters.NewsAdapter;
 import com.kingsmen.finsights.dao.Offer;
+import com.kingsmen.finsights.dao.Transaction;
 import com.kingsmen.finsights.values.CountrySpecificOffers;
 import com.kingsmen.finsights.adapters.OfferAdapter;
 import com.kingsmen.finsights.values.NewsList;
@@ -64,6 +69,7 @@ import com.kingsmen.finsights.values.TransactionList;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -151,7 +157,18 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
+        Log.d(TAG, "size before append = " + transactions.getTransactions().size());
+
+        // read sms
+        List<Transaction> tl = this.readSMS();
+        Log.d(TAG, "after read sms");
+        transactions.getTransactions().addAll(0, tl);
+
+        Log.d(TAG, "size after append = " + transactions.getTransactions().size());
+
         amountSpentByCategory = transactions.getAggregateByCategory();
+
 
         this.initPieChart(root);
 
@@ -442,5 +459,45 @@ public class HomeFragment extends Fragment implements GoogleApiClient.Connection
     @Override
     public void onNothingSelected() {
         Log.i("PieChart", "nothing selected");
+    }
+
+    private List<Transaction> readSMS() {
+        SmsAnalysis sms = new SmsAnalysis();
+        List<Transaction> filteredSmsData = new ArrayList<>();
+        List<SmsData> smsList = new ArrayList<>();
+        int count = 0;
+
+        Cursor cursor = getContext().getContentResolver().query(
+                Uri.parse("content://sms/inbox"),
+                null,
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null) {
+            if(cursor.moveToFirst()) {
+                int nameId = cursor.getColumnIndex("address");
+                int messageId = cursor.getColumnIndex("body");
+                int dateId = cursor.getColumnIndex("date");
+
+                do {
+                    String dateString = cursor.getString(dateId);
+                    smsList.add(
+                            new SmsData(
+                                    cursor.getString(nameId),
+                                    new Date(Long.valueOf(dateString)), cursor.getString(messageId)
+                            )
+                    );
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+
+            filteredSmsData = sms.getData((ArrayList<SmsData>) smsList);
+            Log.d("FILTERED DATA",filteredSmsData.toString());
+            // viewSms.setText(filteredSmsData[0].storeName)
+        }
+        Log.d("Size------------------------------", String.valueOf(smsList.size()));
+        return filteredSmsData;
     }
 }

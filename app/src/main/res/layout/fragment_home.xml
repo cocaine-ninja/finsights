@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorHSBCGrey"
     android:orientation="horizontal"
     tools:context=".ui.home.HomeFragment">
 
@@ -24,6 +25,14 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:text="@string/net_account_balance_heading" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="70dp"
+            android:layout_marginTop="30dp"
+            android:text="Rs. 2,40,596" />
 
     </androidx.cardview.widget.CardView>
 
@@ -165,6 +174,14 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="60dp"
             android:text="@string/safe_to_spend_rs_per_day" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="240dp"
+            android:layout_marginTop="60dp"
+            android:text="Budget: Rs. 20,000" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView

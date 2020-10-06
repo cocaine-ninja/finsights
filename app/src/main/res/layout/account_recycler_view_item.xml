@@ -68,6 +68,15 @@
             android:layout_marginStart="103dp"
             android:layout_marginTop="110dp"
             android:textAlignment="center" />
+
+        <ImageView
+            android:id="@+id/imageView4"
+            android:layout_width="71dp"
+            android:layout_height="68dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="10dp"
+            android:background="#00FF0000"
+            android:backgroundTint="#FF0000" />
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

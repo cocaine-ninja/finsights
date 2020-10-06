@@ -1,9 +1,11 @@
 package com.kingsmen.finsights.adapters;
 
 import android.content.Context;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,17 +14,22 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.kingsmen.finsights.R;
 import com.kingsmen.finsights.dao.Offer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OfferAdapter extends RecyclerView.Adapter<OfferAdapter.ViewHolder> {
     private List<Offer> offers;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
+    private List<Integer> resources;
 
     // data is passed into the constructor
     public OfferAdapter(Context context, List<Offer> offers) {
         this.mInflater = LayoutInflater.from(context);
         this.offers = offers;
+        this.resources = new ArrayList<>();
+        resources.add(R.drawable.offer1);
+        resources.add(R.drawable.offer2);
     }
 
     // inflates the row layout from xml when needed
@@ -39,8 +46,9 @@ public class OfferAdapter extends RecyclerView.Adapter<OfferAdapter.ViewHolder> 
         Offer o = this.offers.get(position);
         String offerType = o.getType();
         String offerDescription = o.getDescription();
-        holder.offerTypeTextView.setText(offerType);
-        holder.offerDescriptionTextView.setText(offerDescription);
+//        holder.offerTypeTextView.setText(offerType);
+//        holder.offerDescriptionTextView.setText(offerDescription);
+        holder.offersImageView.setImageResource(this.resources.get(position));
     }
 
     // total number of rows
@@ -53,11 +61,13 @@ public class OfferAdapter extends RecyclerView.Adapter<OfferAdapter.ViewHolder> 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView offerTypeTextView;
         TextView offerDescriptionTextView;
+        ImageView offersImageView;
 
         ViewHolder(View itemView) {
             super(itemView);
-            offerTypeTextView = itemView.findViewById(R.id.offerTypeTextView);
-            offerDescriptionTextView = itemView.findViewById(R.id.offerDescriptionTextView);
+//            offerTypeTextView = itemView.findViewById(R.id.offerTypeTextView);
+//            offerDescriptionTextView = itemView.findViewById(R.id.offerDescriptionTextView);
+            offersImageView = itemView.findViewById(R.id.imageView6);
             itemView.setOnClickListener(this);
         }
 

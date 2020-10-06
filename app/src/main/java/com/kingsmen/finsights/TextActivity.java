@@ -63,6 +63,10 @@ public class TextActivity extends Activity {
         @Override
         public void promptUserToRespond(final Response response,
                                         final LexServiceContinuation continuation) {
+            if(continuation == null){
+                onReadyForFulfillment(response);
+                return;
+            }
             addMessage(new TextMessage(response.getTextResponse(), "rx", getCurrentTimeStamp()));
             readUserText(continuation);
         }

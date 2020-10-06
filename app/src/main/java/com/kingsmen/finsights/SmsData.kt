@@ -2,7 +2,7 @@ package com.kingsmen.finsights
 
 import java.util.*
 
-data class SmsData(val senderName:String,val date:String, val message: String) {
+data class SmsData(val senderName:String,val date:Date, val message: String) {
 }
 
 data class ExpenseData(val storeName:String, val amount:String, val category:String, val date:String)

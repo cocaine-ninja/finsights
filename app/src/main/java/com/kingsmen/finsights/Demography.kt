@@ -27,7 +27,7 @@ class Demography : AppCompatActivity() {
         changeLanguageCheckBox(textUsed)
         changeLanguageView(hintUsed)
         continue_ahead.setOnClickListener{
-            val intent = Intent(this, MainActivity2::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent);
         }
     }
