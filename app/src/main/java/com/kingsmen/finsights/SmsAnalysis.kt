@@ -11,7 +11,7 @@ class SmsAnalysis() {
     fun getData(smsList: ArrayList<SmsData>): ArrayList<Transaction> {
         smsList.forEach(){
             Log.d("/n-----------------------------------/n",it.senderName)
-            val isFood = it.senderName.contains("SODEXO")
+            val isFood = it.senderName.contains("JDSODEXO")
             if(isFood){
                 val splitMessage = it.message.split(" ")
                 val indexOfStore = splitMessage.lastIndexOf("at") + 1
